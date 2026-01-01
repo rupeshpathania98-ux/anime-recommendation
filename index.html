@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Anime Recommender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1b1b2f, #0f0f14);
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      background: linear-gradient(90deg, #ff4d6d, #c77dff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #bbbbbb;
+      margin-bottom: 30px;
+    }
+
+    textarea {
+      width: 100%;
+      max-width: 700px;
+      height: 100px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 15px;
+      border: none;
+      outline: none;
+      resize: none;
+      background: #1f1f2e;
+      color: #ffffff;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 14px 40px;
+      font-size: 16px;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, #ff4d6d, #ff758f);
+      color: white;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(255, 77, 109, 0.4);
+    }
+
+    .loading {
+      margin-top: 25px;
+      display: none;
+      color: #ffb3c1;
+    }
+
+    .results {
+      margin-top: 50px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 20px;
+      text-align: left;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.09);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      color: #ffccd5;
+      font-size: 1.3rem;
+    }
+
+    .card p {
+      margin: 6px 0;
+      font-size: 14px;
+      color: #dddddd;
+    }
+  
+
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      margin-right: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    footer {
+      margin-top: 60px;
+      color: #888;
+      font-size: 14px;
+    }
+    body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-image:
+    radial-gradient(circle at top, rgba(39, 37, 90, 0.9), rgba(15,15,20,0.95)),
+    url("body-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #000000;
+}
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>AI Anime Recommender</h1>
+    <p class="subtitle">Describe your mood. Let AI decide your next anime.</p>
+
+    <textarea id="prompt" placeholder="Example: dark emotional anime with war and tragedy..."></textarea>
+    <br />
+    <button onclick="getRecommendations()">🎌 Suggest Anime</button>
+
+    <div class="loading" id="loading">🤖 AI is thinking... hame sochne do </div>
+
+    <div class="results" id="results"></div>
+
+    <footer>
+      Built with ❤️ using AI & Anime
+    </footer>
+  </div>
+
+  <script>
+    async function getRecommendations() {
+      const prompt = document.getElementById("prompt").value;
+      const loading = document.getElementById("loading");
+      const resultsDiv = document.getElementById("results");
+
+      if (!prompt.trim()) {
+        alert("Bhai kuch likh to sahi 😅");
+        return;
+      }
+
+      loading.style.display = "block";
+      resultsDiv.innerHTML = "";
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+        loading.style.display = "none";
+
+        data.forEach(anime => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const genres = anime.genres.split(",");
+
+          card.innerHTML = `
+            <h3>${anime.title}</h3>
+            <p><b>⭐ Rating:</b> ${anime.rating}</p>
+            <div>
+              ${genres.map(g => `<span class="tag">${g.trim()}</span>`).join("")}
+            </div>
+          `;
+
+          resultsDiv.appendChild(card);
+        });
+
+      } catch (err) {
+        loading.style.display = "none";
+        alert("Backend chal raha hai na bhai? 😬");
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>
